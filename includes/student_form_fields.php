@@ -26,11 +26,20 @@
   </div>
   <div class="col-md-4">
     <label class="form-label">Faculty *</label>
-    <input type="text" name="Faculty" class="form-control" required maxlength="100">
+    <select name="Faculty" class="form-select" required>
+      <option value="">Select Faculty</option>
+      <option value="Faculty of Technology">Faculty of Technology</option>
+      <option value="Faculty of Applied Sciences">Faculty of Applied Sciences</option>
+      <option value="Faculty of Agriculture">Faculty of Agriculture</option>
+      <option value="Faculty of Medicine / Health Sciences">Faculty of Medicine / Health Sciences</option>
+      <option value="Faculty of Management Studies">Faculty of Management Studies</option>
+    </select>
   </div>
   <div class="col-md-4">
     <label class="form-label">Department *</label>
-    <input type="text" name="Department" class="form-control" required maxlength="100">
+    <select name="Department" class="form-select" required>
+      <option value="">Select Department</option>
+    </select>
   </div>
   <div class="col-md-4">
     <label class="form-label">Academic Year *</label>

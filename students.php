@@ -2,6 +2,24 @@
 require_once __DIR__ . '/includes/auth_check.php';
 $pageTitle = 'Students';
 
+/** Get the short abbreviation or display name for a department */
+function getDeptShortName($deptName) {
+    $decoded = htmlspecialchars_decode($deptName ?? '', ENT_QUOTES);
+    if (preg_match('/\(([^)]+)\)/', $decoded, $matches)) {
+        return $matches[1];
+    }
+    if (str_starts_with($decoded, 'Department of ')) {
+        return substr($decoded, 14);
+    }
+    return $decoded;
+}
+
+/** Properly decode and re-encode to prevent double HTML encoding issues and display correctly */
+function displayClean($value) {
+    return htmlspecialchars(htmlspecialchars_decode($value ?? '', ENT_QUOTES), ENT_QUOTES, 'UTF-8');
+}
+
+
 // ============================================================
 // HANDLE FORM SUBMISSIONS (Create / Update / Delete)
 // ============================================================
@@ -103,11 +121,8 @@ require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/sidebar.php';
 ?>
 <main class="main-content">
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div class="mb-4">
     <h3 class="fw-bold mb-0">Students</h3>
-    <button class="btn btn-brand" data-bs-toggle="modal" data-bs-target="#createStudentModal">
-      <i class="fa-solid fa-plus me-1"></i> Add Student
-    </button>
   </div>
 
   <?php if ($flash = getFlash()): ?>
@@ -119,15 +134,16 @@ require_once __DIR__ . '/includes/sidebar.php';
 
   <div class="card mb-3">
     <div class="card-body">
-      <form method="get" class="row g-2">
-        <div class="col-md-8">
+      <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
+        <div class="flex-grow-1" style="min-width: 250px;">
           <input type="text" name="q" class="form-control" placeholder="Search by name, registration no, or student ID..." value="<?= clean($search) ?>">
         </div>
-        <div class="col-md-2">
-          <button class="btn btn-brand w-100" type="submit"><i class="fa-solid fa-search me-1"></i>Search</button>
-        </div>
-        <div class="col-md-2">
-          <a href="students.php" class="btn btn-outline-secondary w-100">Reset</a>
+        <div class="d-flex gap-2 align-items-center">
+          <button class="btn btn-primary" type="submit"><i class="fa-solid fa-search me-1"></i>Search</button>
+          <a href="students.php" class="btn btn-outline-secondary">Reset</a>
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createStudentModal">
+            <i class="fa-solid fa-plus me-1"></i> Add Student
+          </button>
         </div>
       </form>
     </div>
@@ -136,11 +152,23 @@ require_once __DIR__ . '/includes/sidebar.php';
   <div class="card">
     <div class="card-body p-0">
       <div class="table-responsive">
-      <table class="table table-hover mb-0" id="studentsTable">
-        <thead>
+      <table class="table table-hover mb-0" id="studentsTable" style="table-layout: fixed; width: 100%;">
+        <colgroup>
+          <col style="width: 5%;">
+          <col style="width: 10%;">
+          <col style="width: 15%;">
+          <col style="width: 7%;">
+          <col style="width: 11%;">
+          <col style="width: 16%;">
+          <col style="width: 12%;">
+          <col style="width: 9%;">
+          <col style="width: 7%;">
+          <col style="width: 8%;">
+        </colgroup>
+        <thead class="thead-darker">
           <tr>
             <th>ID</th><th>Reg. No</th><th>Full Name</th><th>Gender</th><th>Phone</th>
-            <th>Email</th><th>Faculty</th><th>Department</th><th>Year</th><th class="text-end">Actions</th>
+            <th>Email</th><th>Faculty</th><th>Department</th><th>Year</th><th class="text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -148,24 +176,35 @@ require_once __DIR__ . '/includes/sidebar.php';
           <tr><td colspan="10" class="text-center text-muted py-4">No students found</td></tr>
           <?php endif; ?>
           <?php foreach ($students as $s): ?>
+          <?php
+          $yearMap = [
+              '1st Year' => '1st Yr',
+              '2nd Year' => '2nd Yr',
+              '3rd Year' => '3rd Yr',
+              '4th Year' => '4th Yr'
+          ];
+          $displayYear = $yearMap[$s['AcademicYear']] ?? $s['AcademicYear'];
+          ?>
           <tr>
             <td>#<?= (int)$s['StudentID'] ?></td>
-            <td><?= clean($s['RegistrationNo']) ?></td>
-            <td><?= clean($s['FullName']) ?></td>
-            <td><?= clean($s['Gender']) ?></td>
-            <td><?= clean($s['Phone']) ?></td>
-            <td><?= clean($s['Email']) ?></td>
-            <td><?= clean($s['Faculty']) ?></td>
-            <td><?= clean($s['Department']) ?></td>
-            <td><?= clean($s['AcademicYear']) ?></td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-outline-primary"
-                onclick='openEditModal("editStudentModal", <?= json_encode($s, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'
-                title="Edit"><i class="fa-solid fa-pen"></i></button>
-              <button class="btn btn-sm btn-outline-danger" title="Delete"
-                data-bs-toggle="modal" data-bs-target="#deleteStudentModal"
-                onclick="document.getElementById('deleteStudentId').value='<?= (int)$s['StudentID'] ?>'; document.getElementById('deleteStudentName').textContent='<?= clean($s['FullName']) ?>';">
-                <i class="fa-solid fa-trash"></i></button>
+            <td title="<?= displayClean($s['RegistrationNo']) ?>"><?= displayClean($s['RegistrationNo']) ?></td>
+            <td title="<?= displayClean($s['FullName']) ?>"><?= displayClean($s['FullName']) ?></td>
+            <td title="<?= displayClean($s['Gender']) ?>"><?= displayClean($s['Gender']) ?></td>
+            <td title="<?= displayClean($s['Phone']) ?>"><?= displayClean($s['Phone']) ?></td>
+            <td title="<?= displayClean($s['Email']) ?>"><?= displayClean($s['Email']) ?></td>
+            <td title="<?= displayClean($s['Faculty']) ?>"><?= displayClean($s['Faculty']) ?></td>
+            <td title="<?= displayClean($s['Department']) ?>"><?= displayClean(getDeptShortName($s['Department'])) ?></td>
+            <td><span class="badge badge-year" title="<?= displayClean($s['AcademicYear']) ?>"><?= displayClean($displayYear) ?></span></td>
+            <td class="text-center">
+              <div class="d-flex gap-1 justify-content-center align-items-center">
+                <button class="btn btn-sm btn-outline-primary"
+                  onclick='openEditModal("editStudentModal", <?= json_encode($s, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'
+                  title="Edit"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn btn-sm btn-outline-danger" title="Delete"
+                  data-bs-toggle="modal" data-bs-target="#deleteStudentModal"
+                  onclick="document.getElementById('deleteStudentId').value='<?= (int)$s['StudentID'] ?>'; document.getElementById('deleteStudentName').textContent='<?= clean($s['FullName']) ?>';">
+                  <i class="fa-solid fa-trash"></i></button>
+              </div>
             </td>
           </tr>
           <?php endforeach; ?>
@@ -231,5 +270,66 @@ require_once __DIR__ . '/includes/sidebar.php';
     </form>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const facultyData = {
+    "Faculty of Technology": [
+      "Department of Information & Communication Technology (ICT)",
+      "Department of Engineering Technology (ET)",
+      "Department of Biosystems Technology (BST)"
+    ],
+    "Faculty of Applied Sciences": [
+      "Department of Physical Science",
+      "Department of Biological Science",
+      "Department of Computing"
+    ],
+    "Faculty of Agriculture": [
+      "Department of Crop Science",
+      "Department of Animal Science",
+      "Department of Agricultural Economics"
+    ],
+    "Faculty of Medicine / Health Sciences": [
+      "Department of Nursing",
+      "Department of Pharmacy",
+      "Department of Medical Laboratory Science (MLS)"
+    ],
+    "Faculty of Management Studies": [
+      "Department of Accountancy & Finance",
+      "Department of Business Management",
+      "Department of Marketing"
+    ]
+  };
+
+  // Bind change events to all Faculty select elements in the document
+  document.querySelectorAll('select[name="Faculty"]').forEach(function(facultySelect) {
+    const form = facultySelect.closest('form');
+    const deptSelect = form.querySelector('select[name="Department"]');
+    
+    facultySelect.addEventListener('change', function() {
+      const selectedFaculty = facultySelect.value;
+      const depts = facultyData[selectedFaculty] || [];
+      
+      // Preserve current selection if possible
+      const currentDept = deptSelect.value;
+      
+      // Clear all options except the placeholder
+      deptSelect.innerHTML = '<option value="">Select Department</option>';
+      
+      depts.forEach(function(dept) {
+        const option = document.createElement('option');
+        option.value = dept;
+        option.textContent = dept;
+        deptSelect.appendChild(option);
+      });
+      
+      // Restore department value if it matches the new options list
+      if (depts.includes(currentDept)) {
+        deptSelect.value = currentDept;
+      }
+    });
+  });
+});
+</script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

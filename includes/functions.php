@@ -40,15 +40,23 @@ function redirect($url) {
     exit;
 }
 
-/** Format currency for display */
+/** Format currency for display (NOTE: Standard Rs. prefix) */
 function formatMoney($amount) {
     return 'Rs. ' . number_format((float)$amount, 2);
 }
 
-/** Format date for display */
+/** Format date for display (e.g. 15 Aug 2025) */
 function formatDate($date) {
     if (empty($date)) return '-';
     return date('d M Y', strtotime($date));
+}
+
+/** Format month for display (e.g. "Jul 2026" from "2026-07") */
+function formatMonth($month) {
+    if (empty($month)) return '-';
+    // Append day -01 if string is YYYY-MM format
+    $time = strtotime(strlen($month) === 7 ? $month . '-01' : $month);
+    return $time ? date('M Y', $time) : clean($month);
 }
 
 /** Generate a CSRF token and store in session */
@@ -64,8 +72,9 @@ function verifyCsrf($token) {
     return !empty($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token ?? '');
 }
 
-/** Badge class for allocation/payment/room statuses */
+/** Status pill badge component generator */
 function statusBadge($status) {
+    // UI badge status color mapping
     $map = [
         'Active'      => 'success',
         'Checked Out' => 'secondary',

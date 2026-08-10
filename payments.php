@@ -94,11 +94,8 @@ require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/sidebar.php';
 ?>
 <main class="main-content">
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div class="mb-4">
     <h3 class="fw-bold mb-0">Payments</h3>
-    <button class="btn btn-brand" data-bs-toggle="modal" data-bs-target="#createPaymentModal">
-      <i class="fa-solid fa-plus me-1"></i> Add Payment
-    </button>
   </div>
 
   <?php if ($flash = getFlash()): ?>
@@ -110,12 +107,17 @@ require_once __DIR__ . '/includes/sidebar.php';
 
   <div class="card mb-3">
     <div class="card-body">
-      <form method="get" class="row g-2">
-        <div class="col-md-8">
+      <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
+        <div class="flex-grow-1" style="min-width: 250px;">
           <input type="text" name="q" class="form-control" placeholder="Search by student name, payment month, or status..." value="<?= clean($search) ?>">
         </div>
-        <div class="col-md-2"><button class="btn btn-brand w-100" type="submit"><i class="fa-solid fa-search me-1"></i>Search</button></div>
-        <div class="col-md-2"><a href="payments.php" class="btn btn-outline-secondary w-100">Reset</a></div>
+        <div class="d-flex gap-2 align-items-center">
+          <button class="btn btn-primary" type="submit"><i class="fa-solid fa-search me-1"></i>Search</button>
+          <a href="payments.php" class="btn btn-outline-secondary">Reset</a>
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPaymentModal">
+            <i class="fa-solid fa-plus me-1"></i> Add Payment
+          </button>
+        </div>
       </form>
     </div>
   </div>
@@ -135,7 +137,7 @@ require_once __DIR__ . '/includes/sidebar.php';
             <td>#<?= (int)$p['PaymentID'] ?></td>
             <td><?= clean($p['FullName']) ?></td>
             <td><?= clean($p['Block'] . '-' . $p['RoomNumber']) ?></td>
-            <td><?= clean($p['PaymentMonth']) ?></td>
+            <td><?= formatMonth($p['PaymentMonth']) ?></td>
             <td><?= formatMoney($p['Amount']) ?></td>
             <td><?= formatDate($p['PaymentDate']) ?></td>
             <td><?= statusBadge($p['PaymentStatus']) ?></td>

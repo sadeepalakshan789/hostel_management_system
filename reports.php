@@ -140,7 +140,7 @@ require_once __DIR__ . '/includes/sidebar.php';
         <?php foreach ($payments as $p): ?>
           <tr>
             <td><?= clean($p['FullName']) ?></td><td><?= clean($p['Block'] . '-' . $p['RoomNumber']) ?></td>
-            <td><?= clean($p['PaymentMonth']) ?></td><td><?= formatMoney($p['Amount']) ?></td>
+            <td><?= formatMonth($p['PaymentMonth']) ?></td><td><?= formatMoney($p['Amount']) ?></td>
             <td><?= formatDate($p['PaymentDate']) ?></td><td><?= statusBadge($p['PaymentStatus']) ?></td>
           </tr>
         <?php endforeach; ?>

@@ -1,4 +1,6 @@
+<!-- Sidebar navigation drawer -->
 <aside class="sidebar" id="sidebar">
+  <!-- Main navigation links with dynamic active route styling -->
   <ul class="nav flex-column">
     <li class="nav-item">
       <a class="nav-link <?= $currentPage === 'dashboard.php' ? 'active' : '' ?>" href="dashboard.php">
@@ -31,4 +33,6 @@
       </a>
     </li>
   </ul>
+  <!-- TODO: Optionally add collapsible sections or quick status indicators here -->
 </aside>
+
